@@ -11,8 +11,15 @@ const smtpRoutes = require('./routes/smtp');
 const app = express();
 const PORT = process.env.PORT || 5500;
 
+// CORS Configuration - Allow all origins for flexibility
+app.use(cors({
+    origin: true, // Allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,8 +50,9 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'admin.html'));
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server - Listen on all network interfaces (0.0.0.0) to accept connections from any IP
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Accessible at http://localhost:${PORT} or http://0.0.0.0:${PORT}`);
 });
 
