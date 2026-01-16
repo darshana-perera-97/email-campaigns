@@ -47,26 +47,59 @@ function createTransporter(userId) {
   
   if (userSettings) {
     // Use user-specific SMTP settings
-    return nodemailer.createTransport({
+    const port = parseInt(userSettings.port);
+    
+    // Determine secure setting based on port if not explicitly set
+    let secure = userSettings.secure;
+    if (secure === undefined) {
+      // Port 465 uses direct SSL/TLS, port 587 uses STARTTLS
+      secure = port === 465;
+    }
+    
+    // Build transporter config
+    const transporterConfig = {
       host: userSettings.host,
-      port: parseInt(userSettings.port),
-      secure: userSettings.secure !== undefined ? userSettings.secure : true,
+      port: port,
+      secure: secure,
       auth: {
         user: userSettings.user,
         pass: userSettings.password,
       },
-    });
+      // Add connection options for better compatibility
+      tls: {
+        rejectUnauthorized: false, // Accept self-signed certificates
+      },
+    };
+    
+    // For port 587, use STARTTLS (secure: false, but require TLS)
+    if (port === 587 && !secure) {
+      transporterConfig.requireTLS = true;
+    }
+    
+    return nodemailer.createTransport(transporterConfig);
   } else {
     // Use default SMTP settings from environment
-    return nodemailer.createTransport({
+    const port = parseInt(process.env.SMTP_PORT || '465');
+    const secure = port === 465;
+    
+    const transporterConfig = {
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: true,
+      port: port,
+      secure: secure,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-    });
+      tls: {
+        rejectUnauthorized: false,
+      },
+    };
+    
+    if (port === 587 && !secure) {
+      transporterConfig.requireTLS = true;
+    }
+    
+    return nodemailer.createTransport(transporterConfig);
   }
 }
 
@@ -120,6 +153,18 @@ router.post('/send', async (req, res) => {
       mailOptions.bcc = Array.isArray(bcc) ? bcc.join(', ') : bcc;
     }
 
+    // Verify connection before sending
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error('SMTP connection verification failed:', verifyError);
+      return res.status(500).json({
+        success: false,
+        error: 'SMTP connection failed. Please check your SMTP settings.',
+        details: verifyError.message,
+      });
+    }
+
     // Send email
     const info = await transporter.sendMail(mailOptions);
 
@@ -130,9 +175,20 @@ router.post('/send', async (req, res) => {
     });
   } catch (error) {
     console.error('Error sending email:', error);
+    
+    // Provide more helpful error messages
+    let errorMessage = 'Failed to send email';
+    if (error.code === 'ESOCKET' || error.message.includes('wrong version number')) {
+      errorMessage = 'SMTP connection error. Please check your port and secure settings. Port 465 requires SSL (secure: true), port 587 requires STARTTLS (secure: false).';
+    } else if (error.code === 'EAUTH') {
+      errorMessage = 'SMTP authentication failed. Please check your username and password.';
+    } else if (error.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to SMTP server. Please check your host and port.';
+    }
+    
     res.status(500).json({
       success: false,
-      error: 'Failed to send email',
+      error: errorMessage,
       details: error.message,
     });
   }
