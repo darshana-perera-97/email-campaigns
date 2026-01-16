@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            color: #1a1a1a;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            background: white;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: #333;
+        }
+
+        .btn-submit:disabled {
+            background: #e5e5e5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #f0f9f4;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .users-list {
+            margin-top: 30px;
+        }
+
+        .users-list h3 {
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .user-item {
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-item-info h4 {
+            margin: 0 0 5px 0;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .user-item-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .user-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        .btn-small.delete {
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .btn-small.delete:hover {
+            background: #fef2f2;
+            border-color: #721c24;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal.hidden {
+            display: none !important;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10001;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: white;
+            color: #1a1a1a;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .login-content {
+            padding: 30px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 20px 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                margin-top: 0;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .logout-btn {
+                position: static;
+                margin-top: 15px;
+                width: auto;
+                align-self: flex-end;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+            }
+
+            .form-group input {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .btn-submit {
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+
+            .users-list {
+                margin-top: 20px;
+            }
+
+            .users-list h3 {
+                font-size: 1.1rem;
+            }
+
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px;
+            }
+
+            .user-item-info {
+                width: 100%;
+                margin-bottom: 12px;
+            }
+
+            .user-item-actions {
+                width: 100%;
+                display: flex;
+                gap: 8px;
+            }
+
+            .btn-small {
+                flex: 1;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                max-height: 95vh;
+            }
+
+            .modal-content div[style*="display: flex"] {
+                flex-direction: column !important;
+            }
+
+            .modal-content div[style*="display: flex"] button {
+                width: 100% !important;
+                margin: 5px 0 !important;
+            }
+
+            .login-container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .login-header {
+                padding: 20px 15px;
+            }
+
+            .login-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 15px 10px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .header p {
+                font-size: 0.8rem;
+            }
+
+            .logout-btn {
+                margin-top: 10px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .content {
+                padding: 15px 10px;
+            }
+
+            .form-group input {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+
+            .btn-submit {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .user-item {
+                padding: 10px;
+            }
+
+            .user-item-info h4 {
+                font-size: 0.95rem;
+            }
+
+            .user-item-info p {
+                font-size: 0.85rem;
+            }
+
+            .btn-small {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .login-header {
+                padding: 15px 10px;
+            }
+
+            .login-content {
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-header">
+            <h1>🔐 Admin Login</h1>
+            <p>User Management Panel</p>
+        </div>
+        <div class="login-content">
+            <div class="message" id="loginMessage"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter admin username" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter admin password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-submit" id="loginBtn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel -->
+    <div id="mainApp" class="container hidden">
+        <div class="header" style="position: relative;">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <h1>👥 User Management</h1>
+            <p>Create and manage user accounts</p>
+        </div>
+
+        <div class="content">
+            <div class="message" id="message"></div>
+
+            <h3 style="margin-bottom: 15px; font-weight: 500; color: #1a1a1a;">Create New User</h3>
+            <form id="createUserForm">
+                <div class="form-group">
+                    <label for="newUsername">Username *</label>
+                    <input type="text" id="newUsername" required placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Enter password">
+                </div>
+                <div class="form-group">
+                    <label for="newEmail">Email (Optional)</label>
+                    <input type="email" id="newEmail" placeholder="Enter email">
+                </div>
+                <button type="submit" class="btn-submit" id="createUserBtn">Create User</button>
+            </form>
+
+            <div class="users-list">
+                <h3>All Users</h3>
+                <div id="usersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-weight: 500; color: #1a1a1a;">Edit User</h3>
+                <button onclick="closeEditUserModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUsername">Username *</label>
+                    <input type="text" id="editUsername" required placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">Password (leave blank to keep current)</label>
+                    <input type="password" id="editPassword" placeholder="Enter new password">
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" placeholder="Enter email">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn-submit" onclick="closeEditUserModal()" style="flex: 1; margin: 0; background: #e5e5e5; color: #666;">Cancel</button>
+                    <button type="submit" class="btn-submit" style="flex: 1; margin: 0;">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const TOKEN_KEY = 'admin_token';
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+        });
+
+        // Check if user is authenticated
+        async function checkAuthentication() {
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                showLoginScreen();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${AUTH_URL}/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    showMainApp();
+                    loadUsers();
+                } else {
+                    localStorage.removeItem(TOKEN_KEY);
+                    showLoginScreen();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem(TOKEN_KEY);
+                showLoginScreen();
+            }
+        }
+
+        // Show login screen
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        // Show main application
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+
+        function showLoginMessage(text, type) {
+            const message = document.getElementById('loginMessage');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const loginBtn = document.getElementById('loginBtn');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.isAdmin) {
+                    localStorage.setItem(TOKEN_KEY, data.token);
+                    showLoginMessage('Login successful!', 'success');
+                    setTimeout(() => {
+                        showMainApp();
+                        loadUsers();
+                    }, 500);
+                } else {
+                    showLoginMessage('Admin access required', 'error');
+                }
+            } catch (error) {
+                showLoginMessage('Error: ' + error.message, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (token) {
+                    await fetch(`${AUTH_URL}/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                localStorage.removeItem(TOKEN_KEY);
+                showLoginScreen();
+                document.getElementById('loginForm').reset();
+            }
+        }
+
+        // Load users
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(USERS_URL, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderUsersList(data.users || []);
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showMessage('Failed to load users', 'error');
+            }
+        }
+
+        // Render users list
+        function renderUsersList(users) {
+            const list = document.getElementById('usersList');
+            list.innerHTML = '';
+            
+            if (users.length === 0) {
+                list.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No users created yet.</p>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'user-item';
+                item.innerHTML = `
+                    <div class="user-item-info">
+                        <h4>${user.username}</h4>
+                        <p>${user.email || 'No email'}</p>
+                        <p style="font-size: 0.8rem; color: #999;">Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div class="user-item-actions">
+                        <button class="btn-small" onclick="editUser('${user.id}')">Edit</button>
+                        <button class="btn-small delete" onclick="deleteUser('${user.id}', '${user.username}')">Delete</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Create user
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const createBtn = document.getElementById('createUserBtn');
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const email = document.getElementById('newEmail').value;
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(USERS_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        email: email
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('User created successfully', 'success');
+                    e.target.reset();
+                    loadUsers();
+                } else {
+                    showMessage(data.error || 'Failed to create user', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create User';
+            }
+        });
+
+        // Edit user
+        async function editUser(userId) {
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${USERS_URL}/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.user) {
+                    document.getElementById('editUserId').value = data.user.id;
+                    document.getElementById('editUsername').value = data.user.username;
+                    document.getElementById('editEmail').value = data.user.email || '';
+                    document.getElementById('editPassword').value = '';
+                    document.getElementById('editUserModal').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Failed to load user details', 'error');
+            }
+        }
+
+        // Close edit modal
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            document.getElementById('editUserForm').reset();
+        }
+
+        // Update user
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const username = document.getElementById('editUsername').value;
+            const password = document.getElementById('editPassword').value;
+            const email = document.getElementById('editEmail').value;
+
+            const updateData = { username, email };
+            if (password) updateData.password = password;
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${USERS_URL}/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('User updated successfully', 'success');
+                    closeEditUserModal();
+                    loadUsers();
+                } else {
+                    showMessage(data.error || 'Failed to update user', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        });
+
+        // Delete user
+        async function deleteUser(userId, username) {
+            if (!confirm(`Are you sure you want to delete user "${username}"?`)) return;
+            
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${USERS_URL}/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('User deleted successfully', 'success');
+                    loadUsers();
+                } else {
+                    showMessage(data.error || 'Failed to delete user', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+

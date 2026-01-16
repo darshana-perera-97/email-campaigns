@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Campaigns - Send Emails</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            color: #1a1a1a;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #666;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab:hover {
+            color: #1a1a1a;
+        }
+
+        .tab.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            background: white;
+        }
+
+        /* Enhanced Template Select Styling */
+        .form-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+            padding-right: 40px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .form-group select:hover {
+            border-color: #1a1a1a;
+            background-color: white;
+        }
+
+        .form-group select option {
+            padding: 10px;
+            background: white;
+            color: #333;
+        }
+
+        .form-group select option:first-child {
+            color: #999;
+            font-style: italic;
+        }
+
+        .form-group select option:checked {
+            background: #f5f5f5;
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .email-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .email-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .email-input-group input {
+            flex: 1;
+        }
+
+        .btn-remove {
+            padding: 8px 16px;
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #fafafa;
+            border-color: #d0d0d0;
+            color: #1a1a1a;
+        }
+
+        .btn-add {
+            padding: 8px 16px;
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-add:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: #333;
+        }
+
+        .btn-submit:active {
+            background: #1a1a1a;
+        }
+
+        .btn-submit:disabled {
+            background: #e5e5e5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #f0f9f4;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .editor-tab {
+            padding: 8px 16px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .editor-tab.active {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .editor-content {
+            display: none;
+        }
+
+        .editor-content.active {
+            display: block;
+        }
+
+        #htmlContent {
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a1a1a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: white;
+            color: #1a1a1a;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .login-content {
+            padding: 30px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal.hidden {
+            display: none !important;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10001;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        #createTemplateModal .modal-content {
+            max-width: 700px;
+        }
+
+        #createTemplateModal .editor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #createTemplateModal .editor-tab {
+            padding: 8px 16px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        #createTemplateModal .editor-tab.active {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        #createTemplateModal .editor-content {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #fafafa;
+            transition: all 0.2s;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        #createTemplateModal .editor-content.active {
+            display: block;
+        }
+
+        #createTemplateModal .editor-content:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            background: white;
+        }
+
+        #createTemplateModal #newTemplateHtml {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Template Cards Styling */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .template-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .template-card:hover {
+            border-color: #1a1a1a;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .template-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .template-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0;
+            flex: 1;
+        }
+
+        .template-card-subject {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .template-card-preview {
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            flex: 1;
+        }
+
+        .template-card-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .template-card-actions {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-card {
+            padding: 8px 16px;
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-card:hover {
+            background: #fafafa;
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+
+        .btn-card-primary {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+
+        .btn-card-primary:hover {
+            background: #333;
+        }
+
+        .btn-card-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-card-danger:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .template-card-meta {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 20px 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                margin-top: 0;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .logout-btn {
+                position: static;
+                margin-top: 15px;
+                width: auto;
+                align-self: flex-end;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            .tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .tab {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .btn-submit {
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+
+            .btn-add,
+            .btn-remove {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .email-input-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .email-input-group input {
+                width: 100%;
+            }
+
+            .editor-tabs {
+                flex-wrap: wrap;
+            }
+
+            .editor-tab {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                max-height: 95vh;
+            }
+
+            .modal-content div[style*="display: flex"] {
+                flex-direction: column !important;
+            }
+
+            .modal-content div[style*="display: flex"] button {
+                width: 100% !important;
+                margin: 5px 0 !important;
+            }
+
+            #createTemplateModal .modal-content {
+                max-width: 95%;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .template-card {
+                padding: 15px;
+            }
+
+            .template-card-title {
+                font-size: 1rem;
+            }
+
+            .template-card-footer {
+                flex-direction: column;
+            }
+
+            .template-card-actions {
+                width: 100%;
+            }
+
+            .btn-card {
+                width: 100%;
+            }
+
+            .login-container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .login-header {
+                padding: 20px 15px;
+            }
+
+            .login-content {
+                padding: 20px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 15px 10px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .header p {
+                font-size: 0.8rem;
+            }
+
+            .logout-btn {
+                margin-top: 10px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .content {
+                padding: 15px 10px;
+            }
+
+            .tab {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+
+            .btn-submit {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .template-card {
+                padding: 12px;
+            }
+
+            .template-card-title {
+                font-size: 0.95rem;
+            }
+
+            .template-card-subject {
+                font-size: 0.85rem;
+            }
+
+            .btn-card {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-header">
+            <h1>🔐 Login</h1>
+            <p>Email Campaigns</p>
+        </div>
+        <div class="login-content">
+            <div class="message" id="loginMessage"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter username"
+                        autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter password"
+                        autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-submit" id="loginBtn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application (Hidden until logged in) -->
+    <div id="mainApp" class="container hidden">
+        <div class="header" style="position: relative;">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <h1>📧 Email Campaigns</h1>
+            <p>Send emails easily with our campaign tool</p>
+        </div>
+
+        <div class="content">
+            <div class="message" id="message"></div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Sending email...</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('single')">Single Email</button>
+                <button class="tab" onclick="switchTab('bulk')">Bulk Email</button>
+                <button class="tab" onclick="switchTab('templates')">Templates</button>
+                <button class="tab" onclick="switchTab('settings')">Settings</button>
+            </div>
+
+            <!-- Single Email Tab -->
+            <div id="single-tab" class="tab-content active">
+                <form id="singleEmailForm">
+                    <div class="form-group">
+                        <label for="toEmail">To Email *</label>
+                        <input type="email" id="toEmail" name="to" required placeholder="recipient@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="templateSelect">📧 Select Template (Optional)</label>
+                        <select id="templateSelect" class="template-select"
+                            onchange="loadTemplate('single', this.value)">
+                            <option value="">-- Choose a template --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <input type="text" id="subject" name="subject" required placeholder="Email subject">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Content *</label>
+                        <div class="editor-tabs">
+                            <button type="button" class="editor-tab active" onclick="switchEditor('text')">Plain
+                                Text</button>
+                            <button type="button" class="editor-tab" onclick="switchEditor('html')">HTML</button>
+                        </div>
+                        <textarea id="textContent" class="editor-content active" name="text"
+                            placeholder="Enter your email content here..." required></textarea>
+                        <textarea id="htmlContent" class="editor-content" name="html"
+                            placeholder="Enter your HTML content here..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-add" onclick="saveAsTemplate('single')"
+                            style="flex: 1; margin: 0;">Save as Template</button>
+                        <button type="submit" class="btn-submit" id="submitBtn" style="flex: 1; margin: 0;">Send
+                            Email</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Email Tab -->
+            <div id="bulk-tab" class="tab-content">
+                <form id="bulkEmailForm">
+                    <div class="form-group">
+                        <label>Recipients *</label>
+                        <div class="email-list" id="recipientsList">
+                            <div class="email-input-group">
+                                <input type="email" class="recipient-email" required
+                                    placeholder="recipient@example.com">
+                                <button type="button" class="btn-remove" onclick="removeRecipient(this)"
+                                    style="display: none;">Remove</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add" onclick="addRecipient()">+ Add Recipient</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bulkTemplateSelect">📧 Select Template (Optional)</label>
+                        <select id="bulkTemplateSelect" class="template-select"
+                            onchange="loadTemplate('bulk', this.value)">
+                            <option value="">-- Choose a template --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bulkSubject">Subject *</label>
+                        <input type="text" id="bulkSubject" name="subject" required placeholder="Email subject">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Content *</label>
+                        <div class="editor-tabs">
+                            <button type="button" class="editor-tab active" onclick="switchEditor('bulk-text')">Plain
+                                Text</button>
+                            <button type="button" class="editor-tab" onclick="switchEditor('bulk-html')">HTML</button>
+                        </div>
+                        <textarea id="bulkTextContent" class="editor-content active" name="text"
+                            placeholder="Enter your email content here..." required></textarea>
+                        <textarea id="bulkHtmlContent" class="editor-content" name="html"
+                            placeholder="Enter your HTML content here..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-add" onclick="saveAsTemplate('bulk')"
+                            style="flex: 1; margin: 0;">Save as Template</button>
+                        <button type="submit" class="btn-submit" id="bulkSubmitBtn" style="flex: 1; margin: 0;">Send
+                            Bulk Emails</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Templates Tab -->
+            <div id="templates-tab" class="tab-content">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; font-weight: 500; color: #1a1a1a;">Email Templates</h3>
+                    <button type="button" class="btn-add" onclick="showCreateTemplateModal()">+ Create New
+                        Template</button>
+                </div>
+                <div id="templatesList"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <h3 style="margin-bottom: 20px; font-weight: 500; color: #1a1a1a;">SMTP Settings</h3>
+                <p style="color: #666; margin-bottom: 20px; font-size: 0.9rem;">Configure your SMTP credentials to send
+                    emails. These settings will be used for all email campaigns.</p>
+                <form id="smtpSettingsForm">
+                    <div class="form-group">
+                        <label for="smtpHost">SMTP Host *</label>
+                        <input type="text" id="smtpHost" required placeholder="mail.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="smtpPort">SMTP Port *</label>
+                        <input type="number" id="smtpPort" required placeholder="465" min="1" max="65535">
+                    </div>
+                    <div class="form-group">
+                        <label for="smtpUser">SMTP Username/Email *</label>
+                        <input type="email" id="smtpUser" required placeholder="your-email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="smtpPassword">SMTP Password *</label>
+                        <input type="password" id="smtpPassword" required placeholder="Enter SMTP password">
+                    </div>
+                    <div class="form-group">
+                        <div style="display: flex; align-items: flex-start;">
+                            <div>
+
+                                <input type="checkbox" id="smtpSecure" checked
+                                    style="margin-right: 8px; margin-top: 2px;">
+                            </div>
+                            <div>
+                                <label for="smtpSecure" style="display: block; margin-bottom: 5px;">Use SSL/TLS (Secure
+                                    connection)</label>
+                                <small style="display: block; color: #666;">Enable for ports 465, disable for ports 587,
+                                    25</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit" id="saveSmtpBtn">Save SMTP Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Template Modal (from email form) -->
+    <div id="saveTemplateModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-weight: 500; color: #1a1a1a;">Save as Template</h3>
+                <button onclick="closeSaveTemplateModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <form id="saveTemplateForm">
+                <div class="form-group">
+                    <label for="templateName">Template Name *</label>
+                    <input type="text" id="templateName" required placeholder="Enter template name">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn-add" onclick="closeSaveTemplateModal()"
+                        style="flex: 1; margin: 0;">Cancel</button>
+                    <button type="submit" class="btn-submit" style="flex: 1; margin: 0;">Save Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create New Template Modal -->
+    <div id="createTemplateModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-weight: 500; color: #1a1a1a;">Create New Template</h3>
+                <button onclick="closeCreateTemplateModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <form id="createTemplateForm">
+                <div class="form-group">
+                    <label for="newTemplateName">Template Name *</label>
+                    <input type="text" id="newTemplateName" required placeholder="Enter template name">
+                </div>
+                <div class="form-group">
+                    <label for="newTemplateSubject">Subject *</label>
+                    <input type="text" id="newTemplateSubject" required placeholder="Email subject">
+                </div>
+                <div class="form-group">
+                    <label>Email Content *</label>
+                    <div class="editor-tabs">
+                        <button type="button" class="editor-tab active" onclick="switchEditorModal('text')">Plain
+                            Text</button>
+                        <button type="button" class="editor-tab" onclick="switchEditorModal('html')">HTML</button>
+                    </div>
+                    <textarea id="newTemplateText" class="editor-content active"
+                        placeholder="Enter your email content here..." required></textarea>
+                    <textarea id="newTemplateHtml" class="editor-content"
+                        placeholder="Enter your HTML content here..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn-add" onclick="closeCreateTemplateModal()"
+                        style="flex: 1; margin: 0;">Cancel</button>
+                    <button type="submit" class="btn-submit" style="flex: 1; margin: 0;">Create Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const TOKEN_KEY = 'email_campaigns_token';
+        const USER_ID_KEY = 'email_campaigns_user_id';
+        let templates = [];
+        let currentFormType = 'single';
+        let currentUserId = null;
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+        });
+
+        // Check if user is authenticated
+        async function checkAuthentication() {
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                showLoginScreen();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${AUTH_URL}/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.authenticated) {
+                    currentUserId = localStorage.getItem(USER_ID_KEY);
+                    showMainApp();
+                    loadTemplates();
+                    if (currentUserId) {
+                        loadSmtpSettings();
+                    }
+                } else {
+                    localStorage.removeItem(TOKEN_KEY);
+                    localStorage.removeItem(USER_ID_KEY);
+                    showLoginScreen();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem(TOKEN_KEY);
+                showLoginScreen();
+            }
+        }
+
+        // Show login screen
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        // Show main application
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        // Show message
+        function showLoginMessage(text, type) {
+            const message = document.getElementById('loginMessage');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const loginBtn = document.getElementById('loginBtn');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem(TOKEN_KEY, data.token);
+                    if (data.userId) {
+                        localStorage.setItem(USER_ID_KEY, data.userId);
+                        currentUserId = data.userId;
+                    }
+                    showLoginMessage('Login successful!', 'success');
+                    setTimeout(() => {
+                        showMainApp();
+                        loadTemplates();
+                        if (currentUserId) {
+                            loadSmtpSettings();
+                        }
+                    }, 500);
+                } else {
+                    showLoginMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showLoginMessage('Error: ' + error.message, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (token) {
+                    await fetch(`${AUTH_URL}/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem(USER_ID_KEY);
+                currentUserId = null;
+                showLoginScreen();
+                document.getElementById('loginForm').reset();
+            }
+        }
+
+        // Load SMTP settings
+        async function loadSmtpSettings() {
+            if (!currentUserId) return;
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${SMTP_URL}?userId=${currentUserId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success && data.settings) {
+                    document.getElementById('smtpHost').value = data.settings.host || '';
+                    document.getElementById('smtpPort').value = data.settings.port || '';
+                    document.getElementById('smtpUser').value = data.settings.user || '';
+                    document.getElementById('smtpPassword').value = ''; // Don't fill password for security
+                    document.getElementById('smtpSecure').checked = data.settings.secure !== undefined ? data.settings.secure : true;
+                }
+            } catch (error) {
+                console.error('Error loading SMTP settings:', error);
+            }
+        }
+
+        // Save SMTP settings
+        document.getElementById('smtpSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUserId) {
+                showMessage('Please login to save SMTP settings', 'error');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveSmtpBtn');
+            const host = document.getElementById('smtpHost').value;
+            const port = document.getElementById('smtpPort').value;
+            const user = document.getElementById('smtpUser').value;
+            const password = document.getElementById('smtpPassword').value;
+            const secure = document.getElementById('smtpSecure').checked;
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(SMTP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        userId: currentUserId,
+                        host: host,
+                        port: port,
+                        user: user,
+                        password: password,
+                        secure: secure
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Clear password field after saving
+                    document.getElementById('smtpPassword').value = '';
+                } else {
+                    showMessage(data.error || 'Failed to save SMTP settings', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save SMTP Settings';
+            }
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+
+            if (tab === 'templates') {
+                renderTemplatesList();
+            } else if (tab === 'settings') {
+                if (currentUserId) {
+                    loadSmtpSettings();
+                }
+            }
+        }
+
+        // Editor switching
+        function switchEditor(type) {
+            const isBulk = type.includes('bulk-');
+            const prefix = isBulk ? 'bulk' : '';
+            const editorType = type.replace('bulk-', '');
+
+            // Update tabs
+            const tabs = document.querySelectorAll(`#${isBulk ? 'bulk' : 'single'}-tab .editor-tab`);
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            const textArea = document.getElementById(prefix + (prefix ? 'Text' : 'text') + 'Content');
+            const htmlArea = document.getElementById(prefix + (prefix ? 'Html' : 'html') + 'Content');
+
+            if (editorType === 'text') {
+                textArea.classList.add('active');
+                htmlArea.classList.remove('active');
+                textArea.required = true;
+                htmlArea.required = false;
+            } else {
+                htmlArea.classList.add('active');
+                textArea.classList.remove('active');
+                htmlArea.required = true;
+                textArea.required = false;
+            }
+        }
+
+        // Recipient management
+        function addRecipient() {
+            const list = document.getElementById('recipientsList');
+            const newInput = document.createElement('div');
+            newInput.className = 'email-input-group';
+            newInput.innerHTML = `
+                <input type="email" class="recipient-email" required placeholder="recipient@example.com">
+                <button type="button" class="btn-remove" onclick="removeRecipient(this)">Remove</button>
+            `;
+            list.appendChild(newInput);
+            updateRemoveButtons();
+        }
+
+        function removeRecipient(btn) {
+            const list = document.getElementById('recipientsList');
+            if (list.children.length > 1) {
+                btn.parentElement.remove();
+                updateRemoveButtons();
+            }
+        }
+
+        function updateRemoveButtons() {
+            const list = document.getElementById('recipientsList');
+            const removeButtons = list.querySelectorAll('.btn-remove');
+            removeButtons.forEach(btn => {
+                btn.style.display = list.children.length > 1 ? 'block' : 'none';
+            });
+        }
+
+        // Show message (for email sending)
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+
+        // Single email form
+        document.getElementById('singleEmailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+
+            const formData = {
+                to: document.getElementById('toEmail').value,
+                subject: document.getElementById('subject').value,
+                text: document.getElementById('textContent').value,
+                html: document.getElementById('htmlContent').value || undefined,
+                userId: currentUserId,
+            };
+
+            // Remove empty html if text is being used
+            if (!formData.html) delete formData.html;
+
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${API_URL}/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    e.target.reset();
+                    document.getElementById('htmlContent').classList.remove('active');
+                    document.getElementById('textContent').classList.add('active');
+                    document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.editor-tab')[0].classList.add('active');
+                } else {
+                    showMessage(data.error || 'Failed to send email', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+
+        // Bulk email form
+        document.getElementById('bulkEmailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('bulkSubmitBtn');
+            const loading = document.getElementById('loading');
+
+            const recipients = Array.from(document.querySelectorAll('.recipient-email'))
+                .map(input => input.value.trim())
+                .filter(email => email);
+
+            const formData = {
+                recipients: recipients,
+                subject: document.getElementById('bulkSubject').value,
+                text: document.getElementById('bulkTextContent').value,
+                html: document.getElementById('bulkHtmlContent').value || undefined,
+                userId: currentUserId,
+            };
+
+            // Remove empty html if text is being used
+            if (!formData.html) delete formData.html;
+
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${API_URL}/send-bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const message = `${data.message}. ${data.errors && data.errors.length > 0 ? 'Errors: ' + data.errors.length : ''}`;
+                    showMessage(message, 'success');
+                    if (data.errors && data.errors.length > 0) {
+                        console.error('Email errors:', data.errors);
+                    }
+                    e.target.reset();
+                    // Reset recipients list
+                    const list = document.getElementById('recipientsList');
+                    list.innerHTML = `
+                        <div class="email-input-group">
+                            <input type="email" class="recipient-email" required placeholder="recipient@example.com">
+                            <button type="button" class="btn-remove" onclick="removeRecipient(this)" style="display: none;">Remove</button>
+                        </div>
+                    `;
+                    document.getElementById('bulkHtmlContent').classList.remove('active');
+                    document.getElementById('bulkTextContent').classList.add('active');
+                    document.querySelectorAll('#bulk-tab .editor-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('#bulk-tab .editor-tab')[0].classList.add('active');
+                } else {
+                    showMessage(data.error || 'Failed to send emails', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        });
+
+        // Load templates from API
+        async function loadTemplates() {
+            if (!currentUserId) return;
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${TEMPLATES_URL}?userId=${currentUserId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    templates = data.templates || [];
+                    updateTemplateSelects();
+                    renderTemplatesList();
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+            }
+        }
+
+        // Update template select dropdowns
+        function updateTemplateSelects() {
+            const singleSelect = document.getElementById('templateSelect');
+            const bulkSelect = document.getElementById('bulkTemplateSelect');
+
+            // Clear existing options except the first one
+            while (singleSelect && singleSelect.children.length > 1) singleSelect.removeChild(singleSelect.lastChild);
+            while (bulkSelect && bulkSelect.children.length > 1) bulkSelect.removeChild(bulkSelect.lastChild);
+
+            if (templates.length === 0) {
+                // Add a "No templates" option if empty
+                if (singleSelect && singleSelect.children.length === 1) {
+                    const option1 = document.createElement('option');
+                    option1.value = '';
+                    option1.textContent = '-- No templates available --';
+                    option1.disabled = true;
+                    singleSelect.appendChild(option1);
+                }
+                if (bulkSelect && bulkSelect.children.length === 1) {
+                    const option2 = document.createElement('option');
+                    option2.value = '';
+                    option2.textContent = '-- No templates available --';
+                    option2.disabled = true;
+                    bulkSelect.appendChild(option2);
+                }
+                return;
+            }
+
+            templates.forEach(template => {
+                if (singleSelect) {
+                    const option1 = document.createElement('option');
+                    option1.value = template.id;
+                    option1.textContent = `📄 ${template.name}`;
+                    singleSelect.appendChild(option1);
+                }
+
+                if (bulkSelect) {
+                    const option2 = document.createElement('option');
+                    option2.value = template.id;
+                    option2.textContent = `📄 ${template.name}`;
+                    bulkSelect.appendChild(option2);
+                }
+            });
+        }
+
+        // Load template into form
+        async function loadTemplate(formType, templateId) {
+            if (!templateId) {
+                // Clear form if no template selected
+                if (formType === 'single') {
+                    document.getElementById('subject').value = '';
+                    document.getElementById('textContent').value = '';
+                    document.getElementById('htmlContent').value = '';
+                } else {
+                    document.getElementById('bulkSubject').value = '';
+                    document.getElementById('bulkTextContent').value = '';
+                    document.getElementById('bulkHtmlContent').value = '';
+                }
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${TEMPLATES_URL}/${templateId}?userId=${currentUserId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success && data.template) {
+                    const template = data.template;
+
+                    if (formType === 'single') {
+                        // Load subject and content
+                        document.getElementById('subject').value = template.subject || '';
+                        document.getElementById('textContent').value = template.text || '';
+                        document.getElementById('htmlContent').value = template.html || '';
+
+                        // Switch editor based on content
+                        const tabs = document.querySelectorAll('#single-tab .editor-tab');
+                        const textArea = document.getElementById('textContent');
+                        const htmlArea = document.getElementById('htmlContent');
+
+                        if (template.html && template.html.trim()) {
+                            // Show HTML editor
+                            tabs.forEach(t => t.classList.remove('active'));
+                            if (tabs[1]) tabs[1].classList.add('active');
+                            textArea.classList.remove('active');
+                            htmlArea.classList.add('active');
+                            textArea.required = false;
+                            htmlArea.required = true;
+                        } else {
+                            // Show text editor
+                            tabs.forEach(t => t.classList.remove('active'));
+                            if (tabs[0]) tabs[0].classList.add('active');
+                            textArea.classList.add('active');
+                            htmlArea.classList.remove('active');
+                            textArea.required = true;
+                            htmlArea.required = false;
+                        }
+                    } else {
+                        // Load subject and content for bulk
+                        document.getElementById('bulkSubject').value = template.subject || '';
+                        document.getElementById('bulkTextContent').value = template.text || '';
+                        document.getElementById('bulkHtmlContent').value = template.html || '';
+
+                        // Switch editor based on content
+                        const tabs = document.querySelectorAll('#bulk-tab .editor-tab');
+                        const textArea = document.getElementById('bulkTextContent');
+                        const htmlArea = document.getElementById('bulkHtmlContent');
+
+                        if (template.html && template.html.trim()) {
+                            // Show HTML editor
+                            tabs.forEach(t => t.classList.remove('active'));
+                            if (tabs[1]) tabs[1].classList.add('active');
+                            textArea.classList.remove('active');
+                            htmlArea.classList.add('active');
+                            textArea.required = false;
+                            htmlArea.required = true;
+                        } else {
+                            // Show text editor
+                            tabs.forEach(t => t.classList.remove('active'));
+                            if (tabs[0]) tabs[0].classList.add('active');
+                            textArea.classList.add('active');
+                            htmlArea.classList.remove('active');
+                            textArea.required = true;
+                            htmlArea.required = false;
+                        }
+                    }
+
+                    showMessage('Template loaded successfully', 'success');
+                }
+            } catch (error) {
+                console.error('Error loading template:', error);
+                showMessage('Failed to load template', 'error');
+            }
+        }
+
+        // Show create new template modal
+        function showCreateTemplateModal() {
+            document.getElementById('createTemplateModal').classList.remove('hidden');
+            // Reset form
+            document.getElementById('createTemplateForm').reset();
+            // Reset editor to text
+            const textArea = document.getElementById('newTemplateText');
+            const htmlArea = document.getElementById('newTemplateHtml');
+            const tabs = document.querySelectorAll('#createTemplateModal .editor-tab');
+
+            textArea.classList.add('active');
+            htmlArea.classList.remove('active');
+            textArea.required = true;
+            htmlArea.required = false;
+
+            tabs.forEach(t => t.classList.remove('active'));
+            if (tabs[0]) tabs[0].classList.add('active');
+        }
+
+        // Close create template modal
+        function closeCreateTemplateModal() {
+            document.getElementById('createTemplateModal').classList.add('hidden');
+            document.getElementById('createTemplateForm').reset();
+        }
+
+        // Switch editor in modal
+        function switchEditorModal(type) {
+            const textArea = document.getElementById('newTemplateText');
+            const htmlArea = document.getElementById('newTemplateHtml');
+            const tabs = document.querySelectorAll('#createTemplateModal .editor-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (type === 'text') {
+                textArea.classList.add('active');
+                htmlArea.classList.remove('active');
+                textArea.required = true;
+                htmlArea.required = false;
+            } else {
+                htmlArea.classList.add('active');
+                textArea.classList.remove('active');
+                htmlArea.required = true;
+                textArea.required = false;
+            }
+        }
+
+        // Show save template modal (from email form)
+        function showSaveTemplateModal() {
+            const formType = document.getElementById('single-tab').classList.contains('active') ? 'single' : 'bulk';
+            currentFormType = formType;
+
+            // Pre-fill template name if subject exists
+            const subject = formType === 'single'
+                ? document.getElementById('subject').value
+                : document.getElementById('bulkSubject').value;
+            document.getElementById('templateName').value = subject || '';
+
+            document.getElementById('saveTemplateModal').classList.remove('hidden');
+        }
+
+        // Close save template modal
+        function closeSaveTemplateModal() {
+            document.getElementById('saveTemplateModal').classList.add('hidden');
+            document.getElementById('saveTemplateForm').reset();
+        }
+
+        // Create new template from modal
+        document.getElementById('createTemplateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUserId) {
+                showMessage('Please login to create templates', 'error');
+                return;
+            }
+
+            const templateName = document.getElementById('newTemplateName').value;
+            const subject = document.getElementById('newTemplateSubject').value;
+            const text = document.getElementById('newTemplateText').value;
+            const html = document.getElementById('newTemplateHtml').value;
+
+            if (!subject) {
+                showMessage('Subject is required', 'error');
+                return;
+            }
+
+            if (!text && !html) {
+                showMessage('Email content (text or html) is required', 'error');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(TEMPLATES_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: templateName,
+                        subject: subject,
+                        text: text,
+                        html: html,
+                        userId: currentUserId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Template created successfully', 'success');
+                    closeCreateTemplateModal();
+                    loadTemplates();
+                } else {
+                    showMessage(data.error || 'Failed to create template', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        });
+
+        // Save as template (from email form)
+        document.getElementById('saveTemplateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUserId) {
+                showMessage('Please login to save templates', 'error');
+                return;
+            }
+
+            const templateName = document.getElementById('templateName').value;
+
+            let subject, text, html;
+
+            if (currentFormType === 'single') {
+                subject = document.getElementById('subject').value;
+                text = document.getElementById('textContent').value;
+                html = document.getElementById('htmlContent').value;
+            } else {
+                subject = document.getElementById('bulkSubject').value;
+                text = document.getElementById('bulkTextContent').value;
+                html = document.getElementById('bulkHtmlContent').value;
+            }
+
+            if (!subject) {
+                showMessage('Subject is required to save template', 'error');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(TEMPLATES_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: templateName,
+                        subject: subject,
+                        text: text,
+                        html: html,
+                        userId: currentUserId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Template saved successfully', 'success');
+                    closeSaveTemplateModal();
+                    loadTemplates();
+                } else {
+                    showMessage(data.error || 'Failed to save template', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        });
+
+        // Render templates list
+        function renderTemplatesList() {
+            const list = document.getElementById('templatesList');
+            if (!list) return;
+
+            list.innerHTML = '';
+
+            if (templates.length === 0) {
+                list.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No templates saved yet. Create one from the email forms or use the "Create New Template" button above.</p>';
+                return;
+            }
+
+            // Create grid container
+            const grid = document.createElement('div');
+            grid.className = 'templates-grid';
+
+            templates.forEach(template => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                
+                // Get preview text (from text or html)
+                let previewText = '';
+                if (template.html) {
+                    // Strip HTML tags for preview
+                    previewText = template.html.replace(/<[^>]*>/g, '').substring(0, 150);
+                } else if (template.text) {
+                    previewText = template.text.substring(0, 150);
+                }
+                if (previewText.length >= 150) previewText += '...';
+
+                // Format date
+                const date = new Date(template.createdAt || template.updatedAt);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+
+                card.innerHTML = `
+                    <div class="template-card-header">
+                        <h3 class="template-card-title">${escapeHtml(template.name)}</h3>
+                    </div>
+                    <div class="template-card-subject">
+                        <strong>Subject:</strong> ${escapeHtml(template.subject || 'No subject')}
+                    </div>
+                    ${previewText ? `<div class="template-card-preview">${escapeHtml(previewText)}</div>` : ''}
+                    <div class="template-card-meta">
+                        Created: ${formattedDate}
+                    </div>
+                    <div class="template-card-footer">
+                        <div class="template-card-actions">
+                            <button class="btn-card btn-card-primary" onclick="useTemplate('${template.id}')">Use Template</button>
+                            <button class="btn-card btn-card-danger" onclick="deleteTemplate('${template.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            list.appendChild(grid);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Use template in single email form
+        function useTemplate(templateId) {
+            // Switch to single email tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('single-tab').classList.add('active');
+            
+            // Load the template
+            document.getElementById('templateSelect').value = templateId;
+            loadTemplate('single', templateId);
+        }
+
+        // Delete template
+        async function deleteTemplate(templateId) {
+            if (!confirm('Are you sure you want to delete this template?')) return;
+
+            try {
+                const token = localStorage.getItem(TOKEN_KEY);
+                const response = await fetch(`${TEMPLATES_URL}/${templateId}?userId=${currentUserId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Template deleted successfully', 'success');
+                    loadTemplates();
+                } else {
+                    showMessage(data.error || 'Failed to delete template', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>
