@@ -52,7 +52,7 @@ function createTransporter(userId) {
     // Determine secure setting based on port if not explicitly set
     let secure = userSettings.secure;
     if (secure === undefined) {
-      // Port 465 uses direct SSL/TLS, port 587 uses STARTTLS
+      // Port 465 typically uses direct SSL/TLS, port 587 uses STARTTLS
       secure = port === 465;
     }
     
@@ -65,15 +65,33 @@ function createTransporter(userId) {
         user: userSettings.user,
         pass: userSettings.password,
       },
-      // Add connection options for better compatibility
+      // Connection timeout
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      // TLS options
       tls: {
         rejectUnauthorized: false, // Accept self-signed certificates
+        minVersion: 'TLSv1.2',
       },
+      // Debug mode (set to true for more verbose logging)
+      debug: false,
+      logger: false,
     };
     
     // For port 587, use STARTTLS (secure: false, but require TLS)
     if (port === 587 && !secure) {
       transporterConfig.requireTLS = true;
+    }
+    
+    // For port 465, ensure secure is true
+    if (port === 465) {
+      transporterConfig.secure = true;
+    }
+    
+    // For port 25, typically unencrypted
+    if (port === 25) {
+      transporterConfig.secure = false;
     }
     
     return nodemailer.createTransport(transporterConfig);
@@ -90,13 +108,23 @@ function createTransporter(userId) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
       tls: {
         rejectUnauthorized: false,
+        minVersion: 'TLSv1.2',
       },
+      debug: false,
+      logger: false,
     };
     
     if (port === 587 && !secure) {
       transporterConfig.requireTLS = true;
+    }
+    
+    if (port === 465) {
+      transporterConfig.secure = true;
     }
     
     return nodemailer.createTransport(transporterConfig);
@@ -133,7 +161,7 @@ router.post('/send', async (req, res) => {
     // Get user SMTP settings or use default
     const userSettings = getUserSmtpSettings(userId);
     const fromEmail = userSettings ? userSettings.user : process.env.SMTP_USER;
-    const transporter = createTransporter(userId);
+    let transporter = createTransporter(userId);
 
     // Email options
     const mailOptions = {
@@ -158,11 +186,66 @@ router.post('/send', async (req, res) => {
       await transporter.verify();
     } catch (verifyError) {
       console.error('SMTP connection verification failed:', verifyError);
-      return res.status(500).json({
-        success: false,
-        error: 'SMTP connection failed. Please check your SMTP settings.',
-        details: verifyError.message,
-      });
+      
+      // If it's a "wrong version number" error, try with opposite secure setting
+      if (verifyError.code === 'ESOCKET' && verifyError.message.includes('wrong version number')) {
+        const userSettings = getUserSmtpSettings(userId);
+        if (userSettings) {
+          console.log('Attempting connection with alternative SSL setting...');
+          const port = parseInt(userSettings.port);
+          
+          // Try the opposite secure setting
+          const alternativeConfig = {
+            host: userSettings.host,
+            port: port,
+            secure: !userSettings.secure, // Try opposite
+            auth: {
+              user: userSettings.user,
+              pass: userSettings.password,
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
+            tls: {
+              rejectUnauthorized: false,
+              minVersion: 'TLSv1.2',
+            },
+          };
+          
+          if (port === 587 && !alternativeConfig.secure) {
+            alternativeConfig.requireTLS = true;
+          }
+          
+          try {
+            const altTransporter = nodemailer.createTransport(alternativeConfig);
+            await altTransporter.verify();
+            console.log('Alternative connection method works! Using it...');
+            transporter = altTransporter;
+          } catch (altError) {
+            console.error('Alternative connection also failed:', altError);
+            return res.status(500).json({
+              success: false,
+              error: 'SMTP connection failed. The server may not support the selected port/SSL combination.',
+              details: `Original error: ${verifyError.message}. Tried alternative: ${altError.message}`,
+              suggestion: port === 465 
+                ? 'Try port 587 with SSL/TLS unchecked, or verify your SMTP server supports SSL on port 465.'
+                : 'Try port 465 with SSL/TLS checked, or verify your SMTP server supports STARTTLS on port 587.',
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            error: 'SMTP connection failed. Please check your SMTP settings.',
+            details: verifyError.message,
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          error: 'SMTP connection failed. Please check your SMTP settings.',
+          details: verifyError.message,
+        });
+      }
     }
 
     // Send email
@@ -224,7 +307,7 @@ router.post('/send-bulk', async (req, res) => {
     // Get user SMTP settings or use default
     const userSettings = getUserSmtpSettings(userId);
     const fromEmail = userSettings ? userSettings.user : process.env.SMTP_USER;
-    const transporter = createTransporter(userId);
+    let transporter = createTransporter(userId);
 
     const results = [];
     const errors = [];
